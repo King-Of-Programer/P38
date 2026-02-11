@@ -13,6 +13,7 @@
         public string? Currency { get; set; }
         public Characteristics? Characteristics { get; set; }
 
+        public DateTime? CreatedAt { get; set; }
 
     }
 }
