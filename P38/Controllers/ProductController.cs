@@ -14,18 +14,14 @@ namespace P38.Controllers
     {
 
         private readonly IMapper _maper;
-        private readonly DBContext _db;
+        private readonly DataBase _db;
 
-        public ProductController(DBContext db, IMapper mapper)
+        public ProductController(DataBase db, IMapper mapper)
         {
             _maper = mapper;
             _db = db;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
 
 
 

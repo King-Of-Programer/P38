@@ -17,7 +17,7 @@ namespace P38.DTO
         public decimal? Price { get; set; }
         [Range(0, int.MaxValue)]
         public int Quantity { get; set; }
-        public string? currency { get; set; }
+        public string? Currency { get; set; }
 
         public CharacteristicsDTO? Characteristics { get; set; }
     }

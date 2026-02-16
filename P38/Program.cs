@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using P38.Data;
 using P38.Mapping;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,12 +12,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//DB
-builder.Services.AddDbContext<DbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration
-    .GetConnectionString("DB")));
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+//DB
+builder.Services.AddDbContext<DataBase>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAutoMapper(typeof(P38.Mapping.MappingProfile).Assembly);
 
 var app = builder.Build();
 

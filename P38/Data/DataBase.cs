@@ -3,10 +3,10 @@ using P38.Models;
 
 namespace P38.Data
 {
-    public class DBContext : DbContext
+    public class DataBase : DbContext
     {
 
-        public DBContext(DbContextOptions<DBContext> options) : base(options) { }
+        public DataBase(DbContextOptions<DataBase> options) : base(options) { }
 
         public DbSet<Product> Products => Set<Product>();
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
