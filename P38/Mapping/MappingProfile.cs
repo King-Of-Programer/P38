@@ -6,7 +6,7 @@ namespace P38.Mapping
 {
     public class MappingProfile : Profile
     {
-        public MappingProfile() 
+        public MappingProfile()
         {
             // Entity -> DTO (для відповіді)
             CreateMap<Product, ProductReadDTO>();

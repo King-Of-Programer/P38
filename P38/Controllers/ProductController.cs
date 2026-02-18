@@ -4,22 +4,26 @@ using Microsoft.EntityFrameworkCore;
 using P38.Data;
 using P38.DTO;
 using P38.Models;
+using P38.Services;
 
 namespace P38.Controllers
 {
 
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/product")]
     public class ProductController : Controller
     {
 
         private readonly IMapper _maper;
         private readonly DataBase _db;
+        private readonly IFileStorage _fileStorage;
 
-        public ProductController(DataBase db, IMapper mapper)
+        public ProductController(DataBase db, IMapper mapper, IFileStorage fileStorage)
         {
             _maper = mapper;
             _db = db;
+            _fileStorage = fileStorage;
+
         }
 
 
@@ -41,7 +45,7 @@ namespace P38.Controllers
                 .AsNoTracking();// не відслідковує зміни об'єкту, для оптимізації
             if (!string.IsNullOrWhiteSpace(q.Brand))
             {
-                query = query.Where(p => 
+                query = query.Where(p =>
                 p.Brand == q.Brand);
             }
             if (!string.IsNullOrWhiteSpace(q.State))
@@ -50,9 +54,9 @@ namespace P38.Controllers
                 p.Characteristics.State == q.State);
             }
 
-            if(q.PriceFrom > 0)
+            if (q.PriceFrom > 0)
             {
-                query = query.Where(p => 
+                query = query.Where(p =>
                 p.Price >= q.PriceFrom);
 
             }
@@ -64,8 +68,8 @@ namespace P38.Controllers
             }
 
             //Sorting
-            bool desc = string.Equals(q.SortDir, 
-                "desc", 
+            bool desc = string.Equals(q.SortDir,
+                "desc",
                 StringComparison.OrdinalIgnoreCase);
 
             query = q.SortBy.ToLower() switch
@@ -84,14 +88,14 @@ namespace P38.Controllers
 
                 _ => query.OrderBy(o => o.Brand)
 
-               
+
             };
 
 
             var totalCount = await query.CountAsync();
             //Pagination
             var items = await query
-                .Skip((q.Page - 1) * q.PageSize)        
+                .Skip((q.Page - 1) * q.PageSize)
                 .Take(q.PageSize)
                 .ToListAsync();
 
@@ -109,10 +113,10 @@ namespace P38.Controllers
 
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<ProductReadDTO>> GetById(Guid id)
+        public async Task<ActionResult<ProductReadDTO>> GetById(Guid id, CancellationToken ct)
         {
             var item = await _db.Products.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id, ct);
 
             if (item == null)
             {
@@ -129,7 +133,9 @@ namespace P38.Controllers
 
 
         [HttpPost("create-product")]
-        public async Task<ActionResult<ProductCreateDTO>> CreateProduct([FromBody] ProductCreateDTO product)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<ProductCreateDTO>> CreateProduct([FromForm] ProductCreateDTO product,
+            CancellationToken ct)
         {
             if (!ModelState.IsValid)
             {
@@ -140,16 +146,23 @@ namespace P38.Controllers
             entity.Id = Guid.NewGuid();
             entity.Characteristics ??= new Characteristics();
 
+            if (product.Image != null && product.Image.Length > 0)
+            {
+                var imagePath = await _fileStorage.SaveProductImageAsync(product.Image, ct);
+                entity.ImagePath = imagePath;
+            }
+
+
             _db.Products.Add(entity);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(ct);
 
             var result = _maper.Map<ProductReadDTO>(entity);
-            return CreatedAtAction(nameof(GetById), new {id = entity.Id}, result);
-           
+            return CreatedAtAction(nameof(GetById), new { id = entity.Id }, result);
+
         }
-        
+
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody]ProductUpdateDTO product)
+        public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDTO product)
         {
             if (!ModelState.IsValid)
             {
@@ -157,7 +170,7 @@ namespace P38.Controllers
             }
 
             var entity = await _db.Products.FirstOrDefaultAsync(x => x.Id == id);
-            if(entity == null) { return NotFound(); }
+            if (entity == null) { return NotFound(); }
 
             entity.Characteristics ??= new Characteristics();
 

@@ -13,6 +13,8 @@
         public string? Currency { get; set; }
         public Characteristics? Characteristics { get; set; }
 
+        public string? ImagePath { get; set; }
+
         public DateTime? CreatedAt { get; set; }
 
     }

@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using P38.Data;
-using P38.Mapping;
-using System;
+using P38.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IFileStorage, FileStorage>();
 
 
 //DB
@@ -34,5 +34,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseStaticFiles();
 
 app.Run();

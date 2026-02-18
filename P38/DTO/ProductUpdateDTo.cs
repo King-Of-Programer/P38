@@ -17,8 +17,11 @@ namespace P38.DTO
         public int Quantity { get; set; }
         public string? currency { get; set; }
 
+        public IFormFile? Image { get; set; }
+
+
         public CharacteristicsDTO? Characteristics { get; set; }
 
-        
+
     }
 }

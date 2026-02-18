@@ -13,7 +13,7 @@ namespace P38.Data
         public DbSet<Order> Orders => Set<Order>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {  
+        {
             modelBuilder.Entity<Product>()
                 .OwnsOne(p => p.Characteristics);
 
